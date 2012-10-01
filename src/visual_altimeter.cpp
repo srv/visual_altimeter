@@ -49,12 +49,13 @@ public:
     if (count == 0)
     {
       dist_msg.data = -1;
+      ROS_INFO_STREAM("   No valid points! Publishing -1 as altitude.");
     }
     else
     {
       dist_msg.data = mean_z / count;
+      ROS_INFO_STREAM("   Z: MIN: " << min_z << "\tMAX: " << max_z << " \tMEAN: " << dist_msg.data);
     }
-    ROS_INFO_STREAM("   Z: MIN: " << min_z << "\tMAX: " << max_z << " \tMEAN: " << mean_z);
     mean_dist_pub_.publish(dist_msg);
   }
 };
