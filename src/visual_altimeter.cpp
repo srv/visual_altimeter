@@ -26,11 +26,6 @@ public:
 
   void pointCloudCb(const PointCloud::ConstPtr& point_cloud)
   {
-    publishMeanDistance(point_cloud);
-  }
-
-  void publishMeanDistance(const PointCloud::ConstPtr& point_cloud)
-  {
     double mean_z, min_z, max_z;
     mean_z = 0.0;
     max_z = 0.0;
@@ -53,7 +48,6 @@ public:
     if (count == 0)
     {
       mean_z = -1;
-      ROS_INFO_STREAM("   No valid points! Publishing -1 as altitude.");
     }
     else
     {
