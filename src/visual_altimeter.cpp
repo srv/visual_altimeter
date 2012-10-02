@@ -52,7 +52,7 @@ public:
     else
     {
       mean_z /= count;
-      double median = distances[distances.size()/2];
+      median = distances[distances.size()/2];
       ROS_INFO_STREAM("   Z: MIN: " << min_z << "\tMAX: " << max_z << " \tMEAN: " << mean_z << " \tMEDIAN: " << median);
     }
     std_msgs::Float32 dist_msg;
