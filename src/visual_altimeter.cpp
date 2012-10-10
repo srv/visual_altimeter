@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 
 #include <std_msgs/Float32.h>
+#include <sensor_msgs/Range.h>
 
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
@@ -15,13 +16,22 @@ class VisualAltimeterNode
   ros::Subscriber point_cloud_sub_;
   ros::Publisher mean_dist_pub_;
   ros::Publisher median_dist_pub_;
+  ros::Publisher range_pub_;
+
+  double min_range_;
+  double max_range_;
+  double field_of_view_;
 
 public:
   VisualAltimeterNode() : nh_private_("~")
   {
+    nh_private_.param("min_range", min_range_, 0.2);
+    nh_private_.param("max_range", max_range_, 3.0);
+    nh_private_.param("field_of_view", field_of_view_, 60.0/180.0*M_PI);
     point_cloud_sub_ = nh_.subscribe<PointCloud>("point_cloud", 1, &VisualAltimeterNode::pointCloudCb, this);
     mean_dist_pub_ = nh_private_.advertise<std_msgs::Float32>("mean_distance", 1);
     median_dist_pub_ = nh_private_.advertise<std_msgs::Float32>("median_distance", 1);
+    range_pub_ = nh_private_.advertise<sensor_msgs::Range>("range", 1);
   }
 
   void pointCloudCb(const PointCloud::ConstPtr& point_cloud)
@@ -61,6 +71,14 @@ public:
     std_msgs::Float32 median_dist_msg;
     median_dist_msg.data = median;
     median_dist_pub_.publish(median_dist_msg);
+
+    sensor_msgs::Range range_msg;
+    range_msg.min_range = min_range_;
+    range_msg.max_range = max_range_;
+    range_msg.field_of_view = field_of_view_;
+    range_msg.range = median;
+
+    range_pub_.publish(range_msg);
   }
 };
 
