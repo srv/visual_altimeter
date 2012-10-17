@@ -31,7 +31,7 @@ public:
     point_cloud_sub_ = nh_.subscribe<PointCloud>("point_cloud", 1, &VisualAltimeterNode::pointCloudCb, this);
     mean_dist_pub_ = nh_private_.advertise<std_msgs::Float32>("mean_distance", 1);
     median_dist_pub_ = nh_private_.advertise<std_msgs::Float32>("median_distance", 1);
-    range_pub_ = nh_private_.advertise<sensor_msgs::Range>("range", 1);
+    range_pub_ = nh_private_.advertise<sensor_msgs::Range>("altitude", 1);
   }
 
   void pointCloudCb(const PointCloud::ConstPtr& point_cloud)
