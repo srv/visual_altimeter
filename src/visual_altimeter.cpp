@@ -21,6 +21,10 @@ class VisualAltimeterNode
   double min_range_;
   double max_range_;
   double field_of_view_;
+  double min_x_;
+  double max_x_;
+  double min_y_;
+  double max_y_;
 
 public:
   VisualAltimeterNode() : nh_private_("~")
@@ -28,6 +32,10 @@ public:
     nh_private_.param("min_range", min_range_, 0.2);
     nh_private_.param("max_range", max_range_, 3.0);
     nh_private_.param("field_of_view", field_of_view_, 60.0/180.0*M_PI);
+    nh_private_.param("min_x", min_x_, -0.2);
+    nh_private_.param("max_x", max_x_,  0.2);
+    nh_private_.param("min_y", min_y_, -0.2);
+    nh_private_.param("max_y", max_y_,  0.2);
     point_cloud_sub_ = nh_.subscribe<PointCloud>("point_cloud", 1, &VisualAltimeterNode::pointCloudCb, this);
     mean_dist_pub_ = nh_private_.advertise<std_msgs::Float32>("mean_distance", 1);
     median_dist_pub_ = nh_private_.advertise<std_msgs::Float32>("median_distance", 1);
@@ -45,9 +53,12 @@ public:
     double median = -1;
     for (size_t i = 0; i < point_cloud->points.size(); ++i)
     {
-      double z = point_cloud->points[i].z;
-      if (!std::isnan(z))
+      const pcl::PointXYZ& point = point_cloud->points[i];
+      if (point.x >= min_x_ && point.x <= max_x_ &&
+          point.y >= min_y_ && point.y <= max_y_ &&
+          !std::isnan(point.z))
       {
+        double z = point.z;
         mean_z += z;
         if (z < min_z) min_z = z;
         if (z > max_z) max_z = z;
@@ -73,6 +84,7 @@ public:
     median_dist_pub_.publish(median_dist_msg);
 
     sensor_msgs::Range range_msg;
+    range_msg.header = point_cloud->header;
     range_msg.min_range = min_range_;
     range_msg.max_range = max_range_;
     range_msg.field_of_view = field_of_view_;
