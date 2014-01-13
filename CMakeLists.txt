@@ -3,6 +3,7 @@ project(visual_altimeter)
 find_package(catkin REQUIRED COMPONENTS 
 	roscpp
 	pcl_ros
+	pcl_conversions
 	std_msgs
 	sensor_msgs)
 

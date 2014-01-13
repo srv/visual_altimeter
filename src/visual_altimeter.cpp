@@ -5,6 +5,7 @@
 
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
+#include <pcl_conversions/pcl_conversions.h>
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
@@ -84,7 +85,7 @@ public:
     median_dist_pub_.publish(median_dist_msg);
 
     sensor_msgs::Range range_msg;
-    range_msg.header = point_cloud->header;
+    range_msg.header = pcl_conversions::fromPCL(point_cloud->header);
     range_msg.min_range = min_range_;
     range_msg.max_range = max_range_;
     range_msg.field_of_view = field_of_view_;
