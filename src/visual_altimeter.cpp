@@ -71,27 +71,29 @@ public:
     {
       mean_z = -1;
     }
-    else
+    else if (count >= 400)  // TODO: parametrize
     {
       mean_z /= count;
       median = distances[distances.size()/2];
       ROS_INFO_STREAM("   Z: MIN: " << min_z << "\tMAX: " << max_z << " \tMEAN: " << mean_z << " \tMEDIAN: " << median);
+      std_msgs::Float32 dist_msg;
+      dist_msg.data = mean_z;
+      mean_dist_pub_.publish(dist_msg);
+      std_msgs::Float32 median_dist_msg;
+      median_dist_msg.data = median;
+      median_dist_pub_.publish(median_dist_msg);
+
+      sensor_msgs::Range range_msg;
+      range_msg.header = pcl_conversions::fromPCL(point_cloud->header);
+      range_msg.min_range = min_range_;
+      range_msg.max_range = max_range_;
+      range_msg.field_of_view = field_of_view_;
+      range_msg.range = median;
+
+      range_pub_.publish(range_msg);
+    } else {
+      ROS_INFO_THROTTLE(10, "[VisualAltimeter]: Not enough points... Count is %d", count);
     }
-    std_msgs::Float32 dist_msg;
-    dist_msg.data = mean_z;
-    mean_dist_pub_.publish(dist_msg);
-    std_msgs::Float32 median_dist_msg;
-    median_dist_msg.data = median;
-    median_dist_pub_.publish(median_dist_msg);
-
-    sensor_msgs::Range range_msg;
-    range_msg.header = pcl_conversions::fromPCL(point_cloud->header);
-    range_msg.min_range = min_range_;
-    range_msg.max_range = max_range_;
-    range_msg.field_of_view = field_of_view_;
-    range_msg.range = median;
-
-    range_pub_.publish(range_msg);
   }
 };
 
