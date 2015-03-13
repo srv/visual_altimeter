@@ -77,21 +77,29 @@ public:
       median = distances[distances.size()/2];
       ROS_INFO_STREAM("   Z: MIN: " << min_z << "\tMAX: " << max_z << " \tMEAN: " << mean_z << " \tMEDIAN: " << median);
     }
-    std_msgs::Float32 dist_msg;
-    dist_msg.data = mean_z;
-    mean_dist_pub_.publish(dist_msg);
-    std_msgs::Float32 median_dist_msg;
-    median_dist_msg.data = median;
-    median_dist_pub_.publish(median_dist_msg);
 
-    sensor_msgs::Range range_msg;
-    range_msg.header = pcl_conversions::fromPCL(point_cloud->header);
-    range_msg.min_range = min_range_;
-    range_msg.max_range = max_range_;
-    range_msg.field_of_view = field_of_view_;
-    range_msg.range = median;
+    // Publish if valid altitude
+    if (mean_z < 6.0 && mean_z > 0.1)
+    {
+      std_msgs::Float32 dist_msg;
+      dist_msg.data = mean_z;
+      mean_dist_pub_.publish(dist_msg);
+      std_msgs::Float32 median_dist_msg;
+      median_dist_msg.data = median;
+      median_dist_pub_.publish(median_dist_msg);
+    }
 
-    range_pub_.publish(range_msg);
+    // Publish if valid altitude
+    if (median < 6.0 && median > 0.1)
+    {
+      sensor_msgs::Range range_msg;
+      range_msg.header = pcl_conversions::fromPCL(point_cloud->header);
+      range_msg.min_range = min_range_;
+      range_msg.max_range = max_range_;
+      range_msg.field_of_view = field_of_view_;
+      range_msg.range = median;
+      range_pub_.publish(range_msg);
+    }
   }
 };
 
