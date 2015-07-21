@@ -1,11 +1,14 @@
 #include <ros/ros.h>
 
+#include <numeric>
 #include <std_msgs/Float32.h>
 #include <sensor_msgs/Range.h>
 
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
 #include <pcl_conversions/pcl_conversions.h>
+
+using namespace std;
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
@@ -25,6 +28,8 @@ class VisualAltimeterNode
   double min_y_;
   double max_y_;
 
+  vector<double> filter_;
+
 public:
   VisualAltimeterNode() : nh_private_("~")
   {
@@ -41,40 +46,48 @@ public:
 
   void pointCloudCb(const PointCloud::ConstPtr& point_cloud)
   {
+    if(range_pub_.getNumSubscribers() == 0) return;
+
     int count = 0;
-    std::vector<double> distances;
-    double median = -1;
+    vector<double> z_dist;
     for (size_t i = 0; i < point_cloud->points.size(); ++i)
     {
       const pcl::PointXYZ& point = point_cloud->points[i];
       if (point.x >= min_x_ && point.x <= max_x_ &&
           point.y >= min_y_ && point.y <= max_y_ &&
-          !std::isnan(point.z))
+          !isnan(point.z))
       {
         count++;
-        distances.push_back(point.z);
+        z_dist.push_back(point.z);
       }
     }
 
-    // Sanity check
-    if (count < 300) // Minimum number of samples
+    // Sanity check and filtering
+    double altitude = -1;
+    if (count > 300) // Minimum number of samples
     {
-      median = -1;
-    }
-    else
-    {
-      median = distances[distances.size()/2];
+      double mean = accumulate(z_dist.begin(), z_dist.end(), 0.0) / z_dist.size();
+
+      // Filter (5 samples)
+      if (filter_.size() < 5)
+        filter_.push_back(mean);
+      else
+      {
+        rotate(filter_.begin(), filter_.begin() + 1, filter_.end());
+        filter_[4] = mean;
+      }
+      altitude = accumulate(filter_.begin(), filter_.end(), 0.0) / filter_.size();
     }
 
     // Publish if valid altitude
-    if (median < max_range_ && median > min_range_)
+    if (altitude < max_range_ && altitude > min_range_)
     {
       sensor_msgs::Range range_msg;
       range_msg.header = pcl_conversions::fromPCL(point_cloud->header);
       range_msg.min_range = min_range_;
       range_msg.max_range = max_range_;
       range_msg.field_of_view = field_of_view_;
-      range_msg.range = median;
+      range_msg.range = altitude;
       range_pub_.publish(range_msg);
     } else {
       ROS_INFO_THROTTLE(10, "[VisualAltimeter]: Invalid altitude. Number of samples: %d", count);
