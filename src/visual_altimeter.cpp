@@ -34,12 +34,12 @@ public:
   VisualAltimeterNode() : nh_private_("~")
   {
     nh_private_.param("min_range", min_range_, 0.5);
-    nh_private_.param("max_range", max_range_, 5.0);
+    nh_private_.param("max_range", max_range_, 6.0);
     nh_private_.param("field_of_view", field_of_view_, 60.0/180.0*M_PI);
-    nh_private_.param("min_x", min_x_, -0.4);
-    nh_private_.param("max_x", max_x_,  0.4);
-    nh_private_.param("min_y", min_y_, -0.4);
-    nh_private_.param("max_y", max_y_,  0.4);
+    nh_private_.param("min_x", min_x_, -0.3);
+    nh_private_.param("max_x", max_x_,  0.3);
+    nh_private_.param("min_y", min_y_, -0.3);
+    nh_private_.param("max_y", max_y_,  0.3);
     point_cloud_sub_ = nh_.subscribe<PointCloud>("point_cloud", 1, &VisualAltimeterNode::pointCloudCb, this);
     range_pub_ = nh_private_.advertise<sensor_msgs::Range>("altitude", 1);
   }
@@ -62,11 +62,12 @@ public:
 
     // Sanity check and filtering
     double altitude = -1;
+
     if (z_dist.size() > 300)
     {
       double max_val = *max_element(z_dist.begin(), z_dist.end());
       double min_val = *min_element(z_dist.begin(), z_dist.end());
-      if (fabs(max_val - min_val) < 0.5)
+      if (fabs(max_val - min_val) < 1.0)
       {
         double mean = accumulate(z_dist.begin(), z_dist.end(), 0.0) / z_dist.size();
 
