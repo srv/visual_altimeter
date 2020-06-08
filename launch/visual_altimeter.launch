@@ -1,0 +1,11 @@
+<launch>
+  <arg name="camera" default="down" /> 
+
+
+  <node pkg="visual_altimeter" type="visual_altimeter" name="visual_altimeter_$(arg camera)" respawn="false" output="screen">
+    <remap from="~/altitude" to="altitude"/>
+    <remap from="point_cloud" to="stereo_$(arg camera)/points2" />
+  </node>
+
+
+</launch>
