@@ -33,8 +33,8 @@ class VisualAltimeterNode
 public:
   VisualAltimeterNode() : nh_private_("~")
   {
-    nh_private_.param("min_range", min_range_, 0.5);
-    nh_private_.param("max_range", max_range_, 6.0);
+    nh_private_.param("min_range", min_range_, 1.0);
+    nh_private_.param("max_range", max_range_, 2.0);
     nh_private_.param("field_of_view", field_of_view_, 60.0/180.0*M_PI);
     nh_private_.param("min_x", min_x_, -0.3);
     nh_private_.param("max_x", max_x_,  0.3);
@@ -63,7 +63,7 @@ public:
     // Sanity check and filtering
     double altitude = -1;
 
-    if (z_dist.size() > 300)
+    if (z_dist.size() > 25)
     {
       double max_val = *max_element(z_dist.begin(), z_dist.end());
       double min_val = *min_element(z_dist.begin(), z_dist.end());
@@ -84,19 +84,19 @@ public:
     }
 
     // Publish if valid altitude
-    if (altitude < max_range_ && altitude > min_range_)
-    {
-      sensor_msgs::Range range_msg;
-      range_msg.header = pcl_conversions::fromPCL(point_cloud->header);
-      range_msg.header.stamp = ros::Time::now();
-      range_msg.min_range = min_range_;
-      range_msg.max_range = max_range_;
-      range_msg.field_of_view = field_of_view_;
-      range_msg.range = altitude;
-      range_pub_.publish(range_msg);
-    } else {
-      ROS_INFO_THROTTLE(10, "[VisualAltimeter]: Invalid altitude");
-    }
+    //if (altitude < max_range_ && altitude > min_range_)
+    //{
+    sensor_msgs::Range range_msg;
+    range_msg.header = pcl_conversions::fromPCL(point_cloud->header);
+    //range_msg.header.stamp = ros::Time::now();
+    range_msg.min_range = min_range_;
+    range_msg.max_range = max_range_;
+    range_msg.field_of_view = field_of_view_;
+    range_msg.range = altitude;
+    range_pub_.publish(range_msg);
+    //} else {
+    //  ROS_INFO_THROTTLE(10, "[VisualAltimeter]: Invalid altitude");
+    //}
   }
 };
 
