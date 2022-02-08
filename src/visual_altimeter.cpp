@@ -33,7 +33,7 @@ class VisualAltimeterNode
 public:
   VisualAltimeterNode() : nh_private_("~")
   {
-    nh_private_.param("min_range", min_range_, 1.0);
+    nh_private_.param("min_range", min_range_, 0.5);
     nh_private_.param("max_range", max_range_, 2.0);
     nh_private_.param("field_of_view", field_of_view_, 60.0/180.0*M_PI);
     nh_private_.param("min_x", min_x_, -0.3);
