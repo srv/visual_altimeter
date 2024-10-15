@@ -1,0 +1,16 @@
+
+<launch>
+    <arg name="stereo"              default="stereo_down" />
+    <arg name="robot_name"          default="turbot"/>
+
+    <group ns="/$(arg robot_name)">
+        <!-- Visual Altimeter -->
+        <node pkg="visual_altimeter" type="visual_altimeter" name="visual_altimeter" respawn="false" output="log">
+            <remap from="point_cloud" to="/$(arg stereo)/scaled_altitude/points2_filtered" />
+            <param name="max_range" value="3.5"/>
+            <param name="min_range" value="0.5"/>
+            <!-- <remap from="point_cloud" to="/$(arg stereo)/scaled_altitude/points2" /> -->
+        </node>
+        
+    </group>
+</launch>
