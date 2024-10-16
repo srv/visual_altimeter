@@ -1,0 +1,41 @@
+
+<launch>
+    <arg name="camera"              default="stereo_ch3" />
+    <arg name="resolution"          default="full"/>
+    <arg name="robot_name"          default="girona500"/>
+    <arg name = "enable_decimate_x1" default = "true"/>
+    <arg name = "enable_decimate_x2" default = "false"/>
+    <arg name = "enable_decimate_x4" default = "false"/>
+    <arg name = "enable_decimate_x8" default = "true"/>
+
+    <arg name = "bagfile" default = "/storage/bagfiles/2024_07_04/2024-07-04-12-36-55.bag"/>
+
+    <!-- PLAY bagfile -->
+    <node pkg = "rosbag" type = "play" name = "rosbag" args = "-r 1 --clock $(arg bagfile) --topics /$(arg camera)/left/camera_info 
+                                                                                                    /$(arg camera)/left/image_raw 
+                                                                                                    /$(arg camera)/right/camera_info 
+                                                                                                    /$(arg camera)/right/image_raw" required = "true" />
+
+    <group ns="/$(arg robot_name)">
+
+        <!-- Launches stereo_crop_decimate and stereo_image_proc -->
+        <include file = "$(find visual_altimeter)/launch/stereo_processing/stereo_pipeline.launch">
+            <arg name = "stereo"             value = "/$(arg camera)" />
+            <arg name = "resolution"         value = "$(arg resolution)" />
+            <arg name = "enable_decimate_x1" value = "$(arg enable_decimate_x1)" />
+            <arg name = "enable_decimate_x2" value = "$(arg enable_decimate_x2)" />
+            <arg name = "enable_decimate_x4" value = "$(arg enable_decimate_x4)" />
+            <arg name = "enable_decimate_x8" value = "$(arg enable_decimate_x8)" />
+        </include>
+
+        <!-- Visual Altimeter -->
+        <node pkg="visual_altimeter" type="visual_altimeter" name="visual_altimeter" respawn="false" output="log">
+            <remap from="point_cloud" to="/$(arg camera)/scaled_x8/points2" />
+            <param name="max_range" value="3.5"/>
+            <param name="min_range" value="0.5"/>
+            <!-- <remap from="point_cloud" to="/$(arg stereo)/scaled_altitude/points2" /> -->
+        </node>
+        
+    </group>
+    
+</launch>

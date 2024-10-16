@@ -1,0 +1,54 @@
+<launch>
+
+    <arg name = "stereo"             default = "stereo_down"/>
+    <arg name = "resolution"         default = "full"/>
+    <arg name = "enable_decimate_x1" default = "true"/>
+    <arg name = "enable_decimate_x2" default = "true"/>
+    <arg name = "enable_decimate_x4" default = "false"/>
+    <arg name = "enable_decimate_x8" default = "false"/>
+
+    <!-- x1 decimate -->
+    <group if = "$(arg enable_decimate_x1)">
+      <include file = "$(find visual_altimeter)/launch/stereo_processing/stereo_image_proc.launch" >
+        <arg name = "stereo"           value = "$(arg stereo)" />
+        <arg name = "disparity_params" value = "$(find visual_altimeter)/config/disparity/disparity_params_$(arg resolution)_x1.yaml" />
+      </include>
+    </group>
+
+    <!-- x2 decimate -->
+    <group if = "$(arg enable_decimate_x2)">
+      <include file = "$(find visual_altimeter)/launch/stereo_processing/stereo_crop_decimate.launch" >
+        <arg name = "stereo"     value = "$(arg stereo)" />
+        <arg name = "decimation" value = "2" />
+      </include>
+      <include file = "$(find visual_altimeter)/launch/stereo_processing/stereo_image_proc.launch" >
+        <arg name = "stereo"           value = "$(arg stereo)/scaled_x2" />
+        <arg name = "disparity_params" value = "$(find visual_altimeter)/config/disparity/disparity_params_$(arg resolution)_x2.yaml"/>
+      </include>
+    </group>
+
+    <!-- x4 decimate -->
+    <group if = "$(arg enable_decimate_x4)">
+      <include file = "$(find visual_altimeter)/launch/stereo_processing/stereo_crop_decimate.launch" >
+        <arg name = "stereo"     value = "$(arg stereo)" />
+        <arg name = "decimation" value = "4" />
+      </include>
+      <include file = "$(find visual_altimeter)/launch/stereo_processing/stereo_image_proc.launch" >
+        <arg name = "stereo"           value = "$(arg stereo)/scaled_x4" />
+        <arg name = "disparity_params" value = "$(find visual_altimeter)/config/disparity/disparity_params_$(arg resolution)_x4.yaml"/>
+      </include>
+    </group>
+
+    <!-- x8 decimate -->
+    <group if = "$(arg enable_decimate_x8)">
+      <include file = "$(find visual_altimeter)/launch/stereo_processing/stereo_crop_decimate.launch" >
+        <arg name = "stereo"     value = "$(arg stereo)" />
+        <arg name = "decimation" value = "8" />
+      </include>
+      <include file = "$(find visual_altimeter)/launch/stereo_processing/stereo_image_proc.launch" >
+        <arg name = "stereo"           value = "$(arg stereo)/scaled_x8" />
+        <arg name = "disparity_params" value = "$(find visual_altimeter)/config/disparity/disparity_params_$(arg resolution)_x8.yaml"/>
+      </include>
+    </group>
+
+</launch>
